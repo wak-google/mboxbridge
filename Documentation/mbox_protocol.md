@@ -22,8 +22,8 @@ this described below.
 
 ## Version
 
-Both version 1 and version 2 of the protocol are described below with version 2
-specificities represented with V2 in brackets - (V2).
+Version 1, 2, 3 of the protocol are described below with version 2 / 3
+specificities represented with V2 / V3 in brackets - (V2) / (V3).
 
 ## Problem Overview
 
@@ -316,6 +316,7 @@ MARK_WRITE_DIRTY     0x07
 WRITE_FLUSH          0x08
 BMC_EVENT_ACK        0x09
 MARK_WRITE_ERASED    0x0a	(V2)
+GET_FLASH_NAME       0x0b	(V3)
 ```
 
 ### Responses
@@ -396,7 +397,7 @@ multiplying by the block size.
 Command:
 	RESET_STATE
 	Implemented in Versions:
-		V1, V2
+		V1, V2, V3
 	Arguments:
 		-
 	Response:
@@ -410,12 +411,12 @@ Command:
 Command:
 	GET_MBOX_INFO
 	Implemented in Versions:
-		V1, V2
+		V1, V2, V3
 	Arguments:
 		V1:
 		Args 0: API version
 
-		V2:
+		V2, V3:
 		Args 0: API version
 
 	Response:
@@ -424,12 +425,13 @@ Command:
 		Args 1-2: default read window size (blocks)
 		Args 3-4: default write window size (blocks)
 
-		V2:
+		V2, V3:
 		Args 0: API version
 		Args 1-2: reserved
 		Args 3-4: reserved
 		Args 5: Block size as power of two (encoded as a shift)
 		Args 6-7: Suggested Timeout (seconds)
+		Args 8: Num Allocated Flash IDs
 	Notes:
 		The suggested timeout is a hint to the host as to how long
 		it should wait after issuing a command to the BMC before it
@@ -442,9 +444,13 @@ Command:
 Command:
 	GET_FLASH_INFO
 	Implemented in Versions:
-		V1, V2
+		V1, V2, V3
 	Arguments:
+		V1, V2:
 		-
+
+		V3:
+		Args 0: Flash ID
 	Response:
 		V1:
 		Args 0-3: Flash size (bytes)
@@ -457,7 +463,7 @@ Command:
 Command:
 	CREATE_{READ/WRITE}_WINDOW
 	Implemented in Versions:
-		V1, V2
+		V1, V2, V3
 	Arguments:
 		V1:
 		Args 0-1: Requested flash offset (blocks)
@@ -466,11 +472,15 @@ Command:
 		Args 0-1: Requested flash offset (blocks)
 		Args 2-3: Requested flash size to access (blocks)
 
+		V3:
+		Args 0-1: Requested flash offset (blocks)
+		Args 2-3: Requested flash size to access (blocks)
+		Args 4: Flash ID
 	Response:
 		V1:
 		Args 0-1: LPC bus address of window (blocks)
 
-		V2:
+		V2, V3:
 		Args 0-1: LPC bus address of window (blocks)
 		Args 2-3: Window size (blocks)
 		Args 4-5: Flash offset mapped by window (blocks)
@@ -506,12 +516,12 @@ Command:
 Command:
 	CLOSE_WINDOW
 	Implemented in Versions:
-		V1, V2
+		V1, V2, V3
 	Arguments:
 		V1:
 		-
 
-		V2:
+		V2, V3:
 		Args 0: Flags
 	Response:
 		-
@@ -535,13 +545,13 @@ Command:
 Command:
 	MARK_WRITE_DIRTY
 	Implemented in Versions:
-		V1, V2
+		V1, V2, V3
 	Arguments:
 		V1:
 		Args 0-1: Flash offset to mark from base of flash (blocks)
 		Args 2-5: Number to mark dirty at offset (bytes)
 
-		V2:
+		V2, V3:
 		Args 0-1: Window offset to mark (blocks)
 		Args 2-3: Number to mark dirty at offset (blocks)
 
@@ -561,13 +571,13 @@ Command:
 Command
 	WRITE_FLUSH
 	Implemented in Versions:
-		V1, V2
+		V1, V2, V3
 	Arguments:
 		V1:
 		Args 0-1: Flash offset to mark from base of flash (blocks)
 		Args 2-5: Number to mark dirty at offset (bytes)
 
-		V2:
+		V2, V3:
 		-
 
 	Response:
@@ -587,7 +597,7 @@ Command
 Command:
 	BMC_EVENT_ACK
 	Implemented in Versions:
-		V1, V2
+		V1, V2, V3
 	Arguments:
 		Args 0:	Bits in the BMC status byte (mailbox data
 			register 15) to ack
@@ -600,9 +610,9 @@ Command:
 Command:
 	MARK_WRITE_ERASED
 	Implemented in Versions:
-		V2
+		V2, V3
 	Arguments:
-		V2:
+		V2, V3:
 		Args 0-1: Window offset to erase (blocks)
 		Args 2-3: Number to erase at offset (blocks)
 	Response:
@@ -617,6 +627,18 @@ Command:
 		number is the number of blocks of the active window to erase
 		starting at offset. If the offset + number exceeds the size of
 		the active window then the command must not succeed.
+
+Command:
+	GET_FLASH_NAME
+	Implemented in Versions:
+		V3
+	Arguments:
+		V3:
+		Args 0: Flash ID
+	Response:
+		V3:
+		Args 0-7: Flash Name / UID
+
 ```
 
 ### BMC Events in Detail:
