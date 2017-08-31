@@ -327,6 +327,7 @@ WRITE_FLUSH          0x08
 BMC_EVENT_ACK        0x09
 MARK_WRITE_ERASED    0x0a	(V2)
 MARK_LOCKED          0x0b	(V3)
+GET_FLASH_NAME       0x0c	(V3)
 ```
 
 ### Responses
@@ -446,6 +447,14 @@ Command:
 		Args 3-4: reserved
 		Args 5: Block size as power of two (encoded as a shift)
 		Args 6-7: Suggested Timeout (seconds)
+
+		V3:
+		Args 0: API version
+		Args 1-2: reserved
+		Args 3-4: reserved
+		Args 5: Block size as power of two (encoded as a shift)
+		Args 6-7: Suggested Timeout (seconds)
+		Args 8: Num Allocated Flash IDs
 	Notes:
 		The suggested timeout is a hint to the host as to how long
 		it should wait after issuing a command to the BMC before it
@@ -465,13 +474,17 @@ Command:
 Command:
 	GET_FLASH_INFO (V1)
 	Arguments:
+		V1, V2:
 		-
+
+		V3:
+		Args 0: Flash ID
 	Response:
 		V1:
 		Args 0-3: Flash size (bytes)
 		Args 4-7: Erase granule (bytes)
 
-		V2:
+		V2, V3:
 		Args 0-1: Flash size (blocks)
 		Args 2-3: Erase granule (blocks)
 
@@ -485,11 +498,15 @@ Command:
 		Args 0-1: Requested flash offset (blocks)
 		Args 2-3: Requested flash size to access (blocks)
 
+		V3:
+		Args 0-1: Requested flash offset (blocks)
+		Args 2-3: Requested flash size to access (blocks)
+		Args 4: Flash ID
 	Response:
 		V1:
 		Args 0-1: LPC bus address of window (blocks)
 
-		V2:
+		V2, V3:
 		Args 0-1: LPC bus address of window (blocks)
 		Args 2-3: Window size (blocks)
 		Args 4-5: Flash offset mapped by window (blocks)
@@ -647,6 +664,16 @@ Command:
 		erased. If the requested area is within the current window and
 		that area is currently marked dirty or erased then this command
 		must fail.
+
+Command:
+	GET_FLASH_NAME (V3)
+	Arguments:
+		Args 0: Flash ID
+	Response:
+		Args 0-7: Flash Name / UID
+	Notes:
+		Describes a flash with some kind of identifier useful to the
+		host system. This is typically a null-padded string.
 
 ```
 
